@@ -331,19 +331,25 @@ open class SwipeTableViewCell: UICollectionViewCell, UIGestureRecognizerDelegate
     /// :nodoc:
     override open func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
         guard let superview = superview else { return false }
-     
-        let point = convert(point, to: superview)
-
-        if !UIAccessibilityIsVoiceOverRunning() {
-            for cell in collectionView?.swipeCells ?? [] {
-                if (cell.state == .left || cell.state == .right) && !cell.contains(point: point) {
-                    collectionView?.hideSwipeCell()
-                    return false
+        
+        if let _ = actionsView {
+            
+            let point = convert(point, to: superview)
+            
+            if !UIAccessibilityIsVoiceOverRunning() {
+                for cell in collectionView?.swipeCells ?? [] {
+                    if (cell.state == .left || cell.state == .right) && !cell.contains(point: point) {
+                        collectionView?.hideSwipeCell()
+                        return false
+                    }
                 }
             }
+            
+            return contains(point: point)
         }
-        
-        return contains(point: point)
+        else {
+            return super.point(inside: point, with: event)
+        }
     }
     
     func contains(point: CGPoint) -> Bool {
