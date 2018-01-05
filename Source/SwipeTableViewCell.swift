@@ -108,8 +108,16 @@ open class SwipeTableViewCell: UICollectionViewCell, UIGestureRecognizerDelegate
     }
     
     /// :nodoc:
-    func handlePan(gesture: UIPanGestureRecognizer) {
-
+    override open func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        
+        if editing {
+            hideSwipe(animated: false)
+        }
+    }
+    
+    @objc func handlePan(gesture: UIPanGestureRecognizer) {
+        guard isEditing == false else { return }
         guard let target = gesture.view else { return }
         
         switch gesture.state {
@@ -249,8 +257,10 @@ open class SwipeTableViewCell: UICollectionViewCell, UIGestureRecognizerDelegate
         } else {
             actionsView.leftAnchor.constraint(equalTo: rightAnchor).isActive = true
         }
-        
-        self.actionsView = actionsView
+		
+		actionsView.setNeedsUpdateConstraints()
+		
+		self.actionsView = actionsView
 
         state = .dragging
         
@@ -315,11 +325,11 @@ open class SwipeTableViewCell: UICollectionViewCell, UIGestureRecognizerDelegate
         }
     }
 
-    func handleTap(gesture: UITapGestureRecognizer) {
+    @objc func handleTap(gesture: UITapGestureRecognizer) {
         hideSwipe(animated: true)
     }
     
-    func handleTablePan(gesture: UIPanGestureRecognizer) {
+    @objc func handleTablePan(gesture: UIPanGestureRecognizer) {
         if gesture.state == .began {
             hideSwipe(animated: true)
         }
@@ -330,7 +340,9 @@ open class SwipeTableViewCell: UICollectionViewCell, UIGestureRecognizerDelegate
     // `SwipeTableCell`.
     /// :nodoc:
     override open func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        let point = convert(point, to: superview!)
+        guard let superview = superview else { return false }
+     
+        let point = convert(point, to: superview)
 
         if !UIAccessibilityIsVoiceOverRunning() {
             for cell in collectionView?.swipeCells ?? [] {
@@ -480,10 +492,11 @@ extension SwipeTableViewCell {
 
     func reset() {
         state = .center
-        
+
         collectionView?.setGestureEnabled(true)
         tapGestureRecognizer.isEnabled = false
         
+        clipsToBounds = false
         actionsView?.removeFromSuperview()
         actionsView = nil
     }
