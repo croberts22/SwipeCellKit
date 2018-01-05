@@ -27,6 +27,8 @@ extension SwipeTableViewCell {
         
         state = .animatingToCenter
         
+        collectionView?.setGestureEnabled(true)
+        
         let targetCenter = self.targetCenter(active: false)
         
         if animated {
@@ -78,7 +80,7 @@ extension SwipeTableViewCell {
         if state != targetState {
             guard showActionsView(for: orientation) else { return }
             
-            tableView?.hideSwipeCell()
+            collectionView?.hideSwipeCell()
             
             state = targetState
         }
